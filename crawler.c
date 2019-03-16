@@ -261,7 +261,19 @@ int NormalizeURL(char *URL)
   }
   return 1;
 }
-
+int calculatekey(char *url)
+{
+  int sum = 0, i;
+    for (i = 0; url[i] != '\0'; i++)
+    {
+      sum += url[i];
+    }
+    while (sum > 9)
+    {
+      sum = sum / 10;
+    }
+    return sum;
+}
 int createfile(char **htmlbuffer, int *filecount,char *url)
 {
   //printf("\n----File count received in function is %d-----\n",*filecount);
@@ -325,16 +337,7 @@ struct list *insertlist(struct list **head, char *url, int currentdepth)
     (*head)->visitedflag = 0;
     (*head)->depth = currentdepth + 1;
     //calculating and inserting key
-    int sum = 0, i;
-    for (i = 0; url[i] != '\0'; i++)
-    {
-      sum += url[i];
-    }
-    while (sum > 9)
-    {
-      sum = sum / 10;
-    }
-    (*head)->key = sum;
+    (*head)->key = calculatekey(url);
     //printf("%s\n",(*head)->url);
     //printf("\n**********Inserting link in linked list***************\n");
     return (*head);
@@ -365,16 +368,7 @@ struct list *insertlist(struct list **head, char *url, int currentdepth)
     temp->visitedflag = 0;
     temp->depth = currentdepth + 1;
     //calculating and inserting key
-    int sum = 0, i;
-    for (i = 0; url[i] != '\0'; i++)
-    {
-      sum += url[i];
-    }
-    while (sum > 9)
-    {
-      sum = sum / 10;
-    }
-    temp->key = sum;
+    temp->key = calculatekey(url);
     return temp;
   }
 }
@@ -426,7 +420,8 @@ int main()
     store[i] = (char *)malloc(sizeof(char) * 2000);
   }
   printf("Do you want to load list ?? (y/n)\n");
-  scanf("%c", &input);
+  scanf("%c ", &input);
+  printf("%c\n",input);
   if (input == 'y' || input == 'Y')
   {
     //Fetch the link list from the file.
@@ -460,7 +455,7 @@ int main()
 
   //************************Next Phase***************************//
   //From here both the cases of reading from a link list or a new one combines
-
+  int sizeofstorage=20;
   while (currentdepth<maxdepth)
   {
     printf("\n\n\n############ get page########\n\n\n");
@@ -478,7 +473,7 @@ int main()
     while (pos < filesize)
     {
       //result=" ";
-      if (linkcount == 10)
+      if (linkcount == sizeofstorage)
       {
         printf("---Count is %d---\n", count);
         break;
@@ -519,14 +514,16 @@ int main()
     temp = head;
     while (temp != NULL)
     {
-      printf("\n%s\n", temp->url);
+      printf("\n\nurl is %s\n", temp->url);
+      printf("Depth is %d\n",temp->depth);
       temp = temp->next;
     }
     printf("Do you want to quit? (y/n)\n");
-    //scanf("%c",&input);
+    scanf("%c",&input);
     if (input == 'y' || input == 'Y')
     {
       //save the link list to the file and exit
+      break;
     }
 
     //free pointers !!!
@@ -538,11 +535,14 @@ int main()
         printf("Url found----terminating loop\n");
         break;
       }
-      else      
-      currentdepth++;
-      printf(" Current depth is %d",currentdepth);
+      else
+      {
+        currentdepth++;
+        sizeofstorage-=5;
+      }
     }
     printf("\n\n\n||||||||||||||outside getnext url||||||||\n\n\n");
+    printf(" Current depth is %d\n\n",currentdepth);
   }
   free(result);
   temp = head;
