@@ -29,11 +29,12 @@ int checkurl(char *url)
     return 0;
 }
 
-void getpage(char *url)
+void getpage(char *url,char *dir)
 {
   char urlbuffer[2100] = {0};
   strcat(urlbuffer, "wget -O ");
-  strcat(urlbuffer, "/home/nikhil/Desktop/APC/SearchEngine/temp.txt ");
+  strcat(urlbuffer,dir);
+  strcat(urlbuffer,"temp.txt ");
   strcat(urlbuffer, url);
   printf("the wget command becomes %s\n", urlbuffer);
   // strcat(urlbuffer, " --proxy-user=user1 --proxy-password=user1");
@@ -274,42 +275,52 @@ int calculatekey(char *url)
     }
     return sum;
 }
-int createfile(char **htmlbuffer, int *filecount,char *url)
+int createfile(char **htmlbuffer, int *filecount,char *url,char *dir)
 {
+  //creating file
   //printf("\n----File count received in function is %d-----\n",*filecount);
   int size;
   //static int filecount=0;
   char filechar[10];
   sprintf(filechar, "%d", *filecount);
   strcat(filechar, ".txt");
-  char final[200] = "touch /home/nikhil/Desktop/APC/SearchEngine/";
-  strcat(final, filechar);
-  printf("\n----Command run to create file is --- %s\n", final);
-  system(final);
+  //char dir[200]="/home/nikhil/Desktop/APC/SearchEngine/";
+  char touch[250] = "touch ";
+  strcat(touch,dir);
+  strcat(touch, filechar);
+  printf("\n----Command run to create file is --- %s\n", touch);
+  system(touch);
 
   // calculating size of file
+  strcpy(touch,dir);
+  strcat(touch,"temp.txt");
   struct stat st;                                              //variable which will count length of file.
-  stat("/home/nikhil/Desktop/APC/SearchEngine/temp.txt", &st); // temp.txt is the file where wget fetch the html
-  size = st.st_size + 10;
+  stat(touch, &st); // temp.txt is the file where wget fetch the html
+  size = st.st_size + 2300;
 
   //copying data
   char *c = (char *)malloc(sizeof(char) * size);
   FILE *fptr1, *fptr2;
-  char temp[] = "/home/nikhil/Desktop/APC/SearchEngine/temp.txt";
-  fptr1 = fopen(temp, "r");
+  fptr1 = fopen(touch, "r");
   if (fptr1 == NULL)
   {
-    printf("Cannot open file %s \n", temp);
+    printf("Cannot open file %s \n", touch);
     exit(0);
   }
-  strcpy(final, "/home/nikhil/Desktop/APC/SearchEngine/");
-  strcat(final, filechar);
-  fptr2 = fopen(final, "w");
+  strcpy(touch,dir);
+  strcat(touch,filechar);
+  fptr2 = fopen(touch, "w");
   if (fptr2 == NULL)
   {
-    printf("Cannot open file %s \n", final);
+    printf("Cannot open file %s \n",touch);
     exit(0);
   }
+  //Writing url to file --
+  char temp[2250] = "--->>This file is created from the link - ";
+  strcat(temp,url);
+  strcat(temp,"\n");
+  fputs(temp,fptr2);
+
   char x;
   int i = 0;
   c[i] = fgetc(fptr1);
@@ -321,7 +332,7 @@ int createfile(char **htmlbuffer, int *filecount,char *url)
   }
   *htmlbuffer = c;
   *filecount = *filecount + 1;
-  printf("\nFile count incremented by receiving in function is %d\n", *filecount);
+  //printf("\nFile count incremented by receiving in function is %d\n", *filecount);
   return size;
 }
 
@@ -404,7 +415,7 @@ int getnexturlfromlist(struct list *head, int currdepth,char *url)
 int main()
 {
   char input;
-  int i, maxdepth=5, filecount = 1;
+  int i, maxdepth=5, filecount;
   int currentdepth;
   char *url = (char *)malloc(sizeof(char) * 200);
   char dir[200];
@@ -424,6 +435,8 @@ int main()
   printf("%c\n",input);
   if (input == 'y' || input == 'Y')
   {
+    //fetch filecount
+    //fetch current directory
     //Fetch the link list from the file.
     //Insert all the data in a data structure.
   }
@@ -451,6 +464,7 @@ int main()
       tail = temp;
     tail->visitedflag = 1;
     currentdepth=1;
+    filecount = 1;
   }
 
   //************************Next Phase***************************//
@@ -459,10 +473,10 @@ int main()
   while (currentdepth<maxdepth)
   {
     printf("\n\n\n############ get page########\n\n\n");
-    getpage(url);
+    getpage(url,dir);
     int filesize = 0;
     char *htmlbuffer;
-    filesize = createfile(&htmlbuffer, &filecount,url);
+    filesize = createfile(&htmlbuffer, &filecount,url,dir);
     printf("\n\nFile created-------File count is %d\n\n", filecount);
     int pos;
     pos=0;
@@ -482,6 +496,7 @@ int main()
       if (pos == -1)
       {
         printf("No link found\n");
+        printf("---Count is %d---\n", count);
         break;
       }
       else
@@ -510,19 +525,22 @@ int main()
       if (temp != NULL)
         tail = temp;
     }
-
+    count=0;
     temp = head;
     while (temp != NULL)
     {
-      printf("\n\nurl is %s\n", temp->url);
+      count++;
+      printf("\nurl is %s\n", temp->url);
       printf("Depth is %d\n",temp->depth);
       temp = temp->next;
     }
+    printf("\nTotal number of urls in list----%d\n",count);
     printf("Do you want to quit? (y/n)\n");
-    scanf("%c",&input);
+    //scanf("%c",&input);
     if (input == 'y' || input == 'Y')
     {
       //save the link list to the file and exit
+      //savelisttofile(head,dir);
       break;
     }
 
