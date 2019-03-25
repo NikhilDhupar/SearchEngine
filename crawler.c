@@ -442,6 +442,44 @@ void  writeurlstofile(char *dir,struct list* head)
   }
   fclose(f);
 }
+int readcrawlerinfo(char *dir,char **seedurl,int *maxdepth,int *filecount)
+{
+    char location[250];
+    strcpy(location,dir);
+    strcat(location,"crawlerinfo.txt");
+    FILE *f = fopen(location,"r");
+    if(f==NULL)
+    {
+      printf("File cannot be opened.");
+      return 1;
+    }
+    else
+    {
+      printf("File %s opened successfully\n",location);
+    }
+    char x[8];
+    int length;
+    //fetch seedurl
+    fgets(*seedurl,200,f);
+    //fetch maximumdepth
+    *maxdepth=0;
+    fgets(x,8,f);
+    length=strlen(x);
+    for(int j=0;j<length-1;j++)
+    {
+      *maxdepth=*maxdepth*10+(x[j]-'0');
+    }
+    //fetch filecount
+    fgets(x,8,f);
+    length=strlen(x);
+    for(int j=0;j<length-1;j++)
+    {
+      *filecount=*filecount*10+(x[j]-'0');
+    }
+    fclose(f);
+    printf("\nReading crawlerinfo complete\nSeedUrl is %sMaxdepth is %d\nFilecount is %d\n",*seedurl,*maxdepth,*filecount);
+    return 0;
+}
 void writecrawlerinfo(char *dir,char *url,int maxdepth,int filecount)
 {
   char location[250];
@@ -463,10 +501,10 @@ void writecrawlerinfo(char *dir,char *url,int maxdepth,int filecount)
 int main()
 {
   char input;
-  int i, maxdepth=5, filecount;
+  int i, maxdepth=5, filecount=0;
   int currentdepth;
   char *url = (char *)malloc(sizeof(char) * 2000);
-  char seedurl[200];
+  char *seedurl = (char *)malloc(sizeof(char) * 200);
   char dir[200];
   //char result[2000];
   char *result = (char *)malloc(sizeof(char) * 2000);
@@ -486,26 +524,19 @@ int main()
   {
     printf("Enter file directory\n");
     //scanf("%s",dir);
-    strcpy(dir, "/home/nikhil/Desktop/APC/SearchEngine/");
+    strcpy(dir,"/home/nikhil/Desktop/APC/SearchEngine/");
     testDir(dir);
-    if (!checkurl(url))
-      return 1;
-    char location[250];
-    strcpy(location,dir);
-    strcat(location,"crawlerinfo.txt");
-    //fetch seedurl
-    //fetch maximimdepth
-    //fetch filecount
-    //fetch current directory
-    //Fetch the link list from the file.
-    //Insert all the data in a data structure.
+    if(readcrawlerinfo(dir,&seedurl,&maxdepth,&filecount))
+    return 1;
+
+    //Fetch the link list from the file and insert all the data in a data structure.
+    return 0;
   }
   else
   {
     printf("Enter seed url\n");
     //scanf("%s",seedurl);
     strcpy(seedurl, "www.chitkara.edu.in/");
-    strcpy(url,seedurl);
     printf("Enter depth\n");
     //scanf("%d",&maxdepth);
     maxdepth = 5;
@@ -518,9 +549,9 @@ int main()
       return 0;
     }
     testDir(dir);
-    if (!checkurl(url))
+    if (!checkurl(seedurl))
       return 1;
-    temp = insertlist(&head, url, 0);
+    temp = insertlist(&head, seedurl, 0);
     if (temp != NULL)
       tail = temp;
     tail->visitedflag = 1;
@@ -533,6 +564,7 @@ int main()
   //************************Next Phase***************************//
   //From here both the cases of reading from a link list or a new one combines
   int sizeofstorage=15;
+  strcpy(url,seedurl);
   while (currentdepth<maxdepth)
   {
     printf("\n\n\n############ get page########\n\n\n");
@@ -630,6 +662,8 @@ int main()
     printf(" Current depth is %d\n\n",currentdepth);
   }
   free(result);
+  free(seedurl);
+  free(url);
   temp = head;
   while (temp != NULL)
   {
