@@ -442,21 +442,20 @@ void  writeurlstofile(char *dir,struct list* head)
   }
   fclose(f);
 }
-void printlist(struct list **temp)
+void printlist(struct list *temp)
 {
     int count=0;
-    while ((*temp) != NULL)
+    while (temp != NULL)
     {
       count++;
-      printf("\nurl is %s\n", (*temp)->url);
-      printf("Depth is %d\n",(*temp)->depth);
-      (*temp) = (*temp)->next;
+      printf("\nurl is %s\n", temp->url);
+      printf("Depth is %d\n",temp->depth);
+      temp = temp->next;
     }
     printf("\nTotal number of urls in list----%d\n",count);
 }
 struct list* getlinks(char *dir,struct list **head)
 {
-  printf("Inside get links function\n");
   char location[250];
   strcpy(location,dir);
   strcat(location,"links.txt");
@@ -478,6 +477,19 @@ struct list* getlinks(char *dir,struct list **head)
       temp=temp->next;
     }
     fgets(url,2000,f);
+    /*
+    strcpy(url,"");
+    int i;
+    char c=getc(f);
+    for(i=0;c!='\n';i++)
+    {
+      url[i]=c;
+      c=getc(f);
+    }
+    url[i]='\0';
+    */
+    length=strlen(url);
+    url[length-2]='\0';
     fgets(x,8,f);
     length=strlen(x);
     for(int j=0;j<length-1;j++)
@@ -502,19 +514,16 @@ struct list* getlinks(char *dir,struct list **head)
     temp->prev=p;
     temp->next=NULL;
     strcpy(temp->url,url);
+    //printf("%s\n",url);
     p=temp;
-    //printf("%s",url);
-    //printf("depth-%d  key-%d  visited-%d\n",depth,key,visited);
     key=0;depth=0;visited=0;
-    //(*head)=(*head)->next;
-    //printlist(temp);
   }
   fclose(f);
   p=p->prev;
   p->next=NULL;
   return p;
 }
-int readcrawlerinfo(char *dir,char **seedurl,int *maxdepth,int *filecount)
+int readcrawlerinfo(char *dir,char **seedurl,int *maxdepth,int *filecount,int *currentdepth,int *sizeofstorage)
 {
     char location[250];
     strcpy(location,dir);
@@ -530,11 +539,21 @@ int readcrawlerinfo(char *dir,char **seedurl,int *maxdepth,int *filecount)
       printf("File %s opened successfully\n",location);
     }
     char x[8];
-    int length;
+    int length,i;
+    strcpy(location,"");
+    *maxdepth=0;*filecount=0;*sizeofstorage=0;*currentdepth=0;
     //fetch seedurl
-    fgets(*seedurl,200,f);
+    char c=getc(f);
+    for(i=0;c!='\n';i++)
+    {
+      //printf("%c",c);
+      location[i]=c;
+      c=getc(f);
+    }
+    location[i]='\0';
+    strcpy(*seedurl,location);
+    //fgets(*seedurl,200,f);
     //fetch maximumdepth
-    *maxdepth=0;
     fgets(x,8,f);
     length=strlen(x);
     for(int j=0;j<length-1;j++)
@@ -548,11 +567,23 @@ int readcrawlerinfo(char *dir,char **seedurl,int *maxdepth,int *filecount)
     {
       *filecount=*filecount*10+(x[j]-'0');
     }
+    fgets(x,8,f);
+    length=strlen(x);
+    for(int j=0;j<length-1;j++)
+    {
+      *currentdepth=*currentdepth*10+(x[j]-'0');
+    }
+    fgets(x,8,f);
+    length=strlen(x);
+    for(int j=0;j<length-1;j++)
+    {
+      *sizeofstorage=*sizeofstorage*10+(x[j]-'0');
+    }
     fclose(f);
-    printf("\nReading crawlerinfo complete\nSeedUrl is %sMaxdepth is %d\nFilecount is %d\n",*seedurl,*maxdepth,*filecount);
+    printf("Reading crawlerinfo complete\nSeedUrl is %s\nMaxdepth is %d\nFilecount is %d\ncurrentdepth is %d\nSizeofstorage is %d\n\n",*seedurl,*maxdepth,*filecount,*currentdepth,*sizeofstorage);
     return 0;
 }
-void writecrawlerinfo(char *dir,char *url,int maxdepth,int filecount)
+void writecrawlerinfo(char *dir,char *url,int maxdepth,int filecount,int currentdepth,int sizeofstorage)
 {
   char location[250];
   char depth[2];
@@ -568,13 +599,20 @@ void writecrawlerinfo(char *dir,char *url,int maxdepth,int filecount)
   sprintf(count,"%d",filecount);
   fputs(count,f);
   fputc('\n',f);
+  sprintf(count,"%d",currentdepth);
+  fputs(count,f);
+  fputc('\n',f);
+  sprintf(count,"%d",sizeofstorage);
+  fputs(count,f);
+  fputc('\n',f);
   fclose(f);
 }
 int main()
 {
   char input;
   int i, maxdepth=5, filecount=0;
-  int currentdepth;
+  int sizeofstorage=10;
+  int currentdepth=1;
   char *url = (char *)malloc(sizeof(char) * 2000);
   char *seedurl = (char *)malloc(sizeof(char) * 200);
   char dir[200];
@@ -599,13 +637,12 @@ int main()
     strcpy(dir,"/home/nikhil/Desktop/APC/SearchEngine/");
     testDir(dir);
     //Get seedurl,maxdepth,filecount
-    if(readcrawlerinfo(dir,&seedurl,&maxdepth,&filecount))
+    if(readcrawlerinfo(dir,&seedurl,&maxdepth,&filecount,&currentdepth,&sizeofstorage))
     return 1;
     //Fetch the link list from the file and insert all the data in a data structure.
     tail=getlinks(dir,&head);
     //Printing urls in the list
-    printlist(&head);
-    return 0;
+    printlist(head);
   }
   else
   {
@@ -629,25 +666,39 @@ int main()
     temp = insertlist(&head, seedurl, 0);
     if (temp != NULL)
       tail = temp;
-    tail->visitedflag = 1;
+    tail->visitedflag = 0;
     currentdepth=1;
     filecount = 1;
     //Saving all the data in crawlerinfo.txt file
-    writecrawlerinfo(dir,seedurl,maxdepth,filecount);
+    writecrawlerinfo(dir,seedurl,maxdepth,filecount,currentdepth,sizeofstorage);
   }
 
   //************************Next Phase***************************//
   //From here both the cases of reading from a link list or a new one combines
-  int sizeofstorage=25;
-  strcpy(url,seedurl);
   while (currentdepth<maxdepth)
   {
-    printf("\n\n\n############ get page########\n\n\n");
+    //printlist(head);
+    while (currentdepth<maxdepth)
+    {
+      if(getnexturlfromlist(head,currentdepth,url))
+      {
+        printf("---Url found----\n");
+        break;
+      }
+      else
+      {
+        currentdepth++;
+        sizeofstorage-=5;
+      }
+      printf(" Current depth is %d\n\n",currentdepth);
+    }
+    if(currentdepth==maxdepth)
+      break;
+    printf("\n\n||||||||||||||outside getnext url||||||||\n\n");
     getpage(url,dir);
     int filesize = 0;
     char *htmlbuffer;
     filesize = createfile(&htmlbuffer, &filecount,url,dir);
-    writecrawlerinfo(dir,seedurl,maxdepth,filecount);
     printf("\n\nFile created-------File count is %d\n\n", filecount);
     int pos;
     pos=0;
@@ -696,40 +747,17 @@ int main()
       if (temp != NULL)
         tail = temp;
     }
-    //Writing urls to a file
+    //Writing data to a files
     writeurlstofile(dir,head);
+    writecrawlerinfo(dir,seedurl,maxdepth,filecount,currentdepth,sizeofstorage);
     //Printing urls in the list
-    printlist(&head);
-    printf("Do you want to quit? (y/n)\n");
-    //scanf("%c",&input);
-    if (input == 'y' || input == 'Y')
-    {
-      //save the link list to the file and exit
-      //savelisttofile(head,dir);
-      break;
-    }
-
+    printlist(head);
     //free pointers !!!
     free(htmlbuffer);
-    while(currentdepth<maxdepth)
-    {
-      if(getnexturlfromlist(head,currentdepth,url))
-      {
-        printf("Url found----terminating loop\n");
-        break;
-      }
-      else
-      {
-        currentdepth++;
-        sizeofstorage-=5;
-      }
-    }
-    printf("\n\n\n||||||||||||||outside getnext url||||||||\n\n\n");
-    printf(" Current depth is %d\n\n",currentdepth);
   }
   free(result);
   free(seedurl);
-  free(url);
+  //free(url);
   temp = head;
   while (temp != NULL)
   {
