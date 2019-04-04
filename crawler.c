@@ -29,12 +29,12 @@ int checkurl(char *url)
     return 0;
 }
 
-void getpage(char *url,char *dir)
+void getpage(char *url, char *dir)
 {
   char urlbuffer[2100] = {0};
   strcat(urlbuffer, "wget -O ");
-  strcat(urlbuffer,dir);
-  strcat(urlbuffer,"temp.txt ");
+  strcat(urlbuffer, dir);
+  strcat(urlbuffer, "temp.txt ");
   strcat(urlbuffer, url);
   printf("the wget command becomes %s\n", urlbuffer);
   // strcat(urlbuffer, " --proxy-user=user1 --proxy-password=user1");
@@ -265,17 +265,17 @@ int NormalizeURL(char *URL)
 int calculatekey(char *url)
 {
   int sum = 0, i;
-    for (i = 0; url[i] != '\0'; i++)
-    {
-      sum += url[i];
-    }
-    while (sum > 9)
-    {
-      sum = sum / 10;
-    }
-    return sum;
+  for (i = 0; url[i] != '\0'; i++)
+  {
+    sum += url[i];
+  }
+  while (sum > 9)
+  {
+    sum = sum / 10;
+  }
+  return sum;
 }
-int createfile(char **htmlbuffer, int *filecount,char *url,char *dir)
+int createfile(char **htmlbuffer, int *filecount, char *url, char *dir)
 {
   //creating file
   //printf("\n----File count received in function is %d-----\n",*filecount);
@@ -286,15 +286,15 @@ int createfile(char **htmlbuffer, int *filecount,char *url,char *dir)
   strcat(filechar, ".txt");
   //char dir[200]="/home/nikhil/Desktop/APC/SearchEngine/";
   char touch[250] = "touch ";
-  strcat(touch,dir);
+  strcat(touch, dir);
   strcat(touch, filechar);
   printf("\n----Command run to create file is --- %s\n", touch);
   system(touch);
 
   // calculating size of file
-  strcpy(touch,dir);
-  strcat(touch,"temp.txt");
-  struct stat st;                                              //variable which will count length of file.
+  strcpy(touch, dir);
+  strcat(touch, "temp.txt");
+  struct stat st;   //variable which will count length of file.
   stat(touch, &st); // temp.txt is the file where wget fetch the html
   size = st.st_size + 2300;
 
@@ -307,19 +307,19 @@ int createfile(char **htmlbuffer, int *filecount,char *url,char *dir)
     printf("Cannot open file %s \n", touch);
     exit(0);
   }
-  strcpy(touch,dir);
-  strcat(touch,filechar);
+  strcpy(touch, dir);
+  strcat(touch, filechar);
   fptr2 = fopen(touch, "w");
   if (fptr2 == NULL)
   {
-    printf("Cannot open file %s \n",touch);
+    printf("Cannot open file %s \n", touch);
     exit(0);
   }
   //Writing url to file --
-  char temp[2250] = "--->>This file is created from the link - ";
-  strcat(temp,url);
-  strcat(temp,"\n");
-  fputs(temp,fptr2);
+  char temp[2250];
+  strcpy(temp, url);
+  strcat(temp, "\n");
+  fputs(temp, fptr2);
 
   char x;
   int i = 0;
@@ -394,7 +394,7 @@ void printresult(char *x)
   }
   printf("\n");
 }
-int getnexturlfromlist(struct list *head, int currdepth,char *url)
+int getnexturlfromlist(struct list *head, int currdepth, char *url)
 {
   printf("\n\n\n||||||||||||||Inside getnext url||||||||\n\n\n");
   struct list *temp = head;
@@ -412,71 +412,71 @@ int getnexturlfromlist(struct list *head, int currdepth,char *url)
   }
   return 0;
 }
-void  writeurlstofile(char *dir,struct list* head)
+void writeurlstofile(char *dir, struct list *head)
 {
   //printf("\nInside writeurlstofile function\n");
   char location[300];
   char x[3];
   int i;
-  strcpy(location,dir);
-  strcat(location,"links.txt");
+  strcpy(location, dir);
+  strcat(location, "links.txt");
   //printf("Writing urls to file %s\n",location);
-  FILE *f = fopen(location,"w");
-  while(head!=NULL)
+  FILE *f = fopen(location, "w");
+  while (head != NULL)
   {
-    fputs(head->url,f);
-    fputc('\n',f);
-    i=head->depth;
-    sprintf(x, "%d",i);
-    fputs(x,f);
-    fputc('\n',f);
-    i=head->key;
+    fputs(head->url, f);
+    fputc('\n', f);
+    i = head->depth;
     sprintf(x, "%d", i);
-    fputs(x,f);
-    fputc('\n',f);
-    i=head->visitedflag;
+    fputs(x, f);
+    fputc('\n', f);
+    i = head->key;
     sprintf(x, "%d", i);
-    fputs(x,f);
-    fputc('\n',f);
-    head=head->next;
+    fputs(x, f);
+    fputc('\n', f);
+    i = head->visitedflag;
+    sprintf(x, "%d", i);
+    fputs(x, f);
+    fputc('\n', f);
+    head = head->next;
   }
   fclose(f);
 }
 void printlist(struct list *temp)
 {
-    int count=0;
-    while (temp != NULL)
-    {
-      count++;
-      printf("\nurl is %s\n", temp->url);
-      printf("Depth is %d\n",temp->depth);
-      temp = temp->next;
-    }
-    printf("\nTotal number of urls in list----%d\n",count);
+  int count = 0;
+  while (temp != NULL)
+  {
+    count++;
+    printf("\nurl is %s\n", temp->url);
+    printf("Depth is %d\n", temp->depth);
+    temp = temp->next;
+  }
+  printf("\nTotal number of urls in list----%d\n", count);
 }
-struct list* getlinks(char *dir,struct list **head)
+struct list *getlinks(char *dir, struct list **head)
 {
   char location[250];
-  strcpy(location,dir);
-  strcat(location,"links.txt");
-  FILE *f=fopen(location,"r");
+  strcpy(location, dir);
+  strcat(location, "links.txt");
+  FILE *f = fopen(location, "r");
   char url[2000];
-  int key,depth,visited,length;
+  int key, depth, visited, length;
   char x[8];
-  struct list* p=NULL,*temp;
-  while(!feof(f))
+  struct list *p = NULL, *temp;
+  while (!feof(f))
   {
-    if((*head)==NULL)
+    if ((*head) == NULL)
     {
-      (*head)=(struct list*)malloc(sizeof(struct list));
-      temp=(*head);
+      (*head) = (struct list *)malloc(sizeof(struct list));
+      temp = (*head);
     }
     else
     {
-      temp->next=(struct list*)malloc(sizeof(struct list));
-      temp=temp->next;
+      temp->next = (struct list *)malloc(sizeof(struct list));
+      temp = temp->next;
     }
-    fgets(url,2000,f);
+    fgets(url, 2000, f);
     /*
     strcpy(url,"");
     int i;
@@ -488,131 +488,136 @@ struct list* getlinks(char *dir,struct list **head)
     }
     url[i]='\0';
     */
-    length=strlen(url);
-    url[length-2]='\0';
-    fgets(x,8,f);
-    length=strlen(x);
-    for(int j=0;j<length-1;j++)
+    length = strlen(url);
+    url[length - 2] = '\0';
+    fgets(x, 8, f);
+    length = strlen(x);
+    for (int j = 0; j < length - 1; j++)
     {
-      depth=depth*10+(x[j]-'0');
+      depth = depth * 10 + (x[j] - '0');
     }
-    fgets(x,8,f);
-    length=strlen(x);
-    for(int j=0;j<length-1;j++)
+    fgets(x, 8, f);
+    length = strlen(x);
+    for (int j = 0; j < length - 1; j++)
     {
-      key=key*10+(x[j]-'0');
+      key = key * 10 + (x[j] - '0');
     }
-    fgets(x,8,f);
-    length=strlen(x);
-    for(int j=0;j<length-1;j++)
+    fgets(x, 8, f);
+    length = strlen(x);
+    for (int j = 0; j < length - 1; j++)
     {
-      visited=visited*10+(x[j]-'0');
+      visited = visited * 10 + (x[j] - '0');
     }
-    temp->depth=depth;
-    temp->visitedflag=visited;
-    temp->key=key;
-    temp->prev=p;
-    temp->next=NULL;
-    strcpy(temp->url,url);
+    temp->depth = depth;
+    temp->visitedflag = visited;
+    temp->key = key;
+    temp->prev = p;
+    temp->next = NULL;
+    strcpy(temp->url, url);
     //printf("%s\n",url);
-    p=temp;
-    key=0;depth=0;visited=0;
+    p = temp;
+    key = 0;
+    depth = 0;
+    visited = 0;
   }
   fclose(f);
-  p=p->prev;
-  p->next=NULL;
+  p = p->prev;
+  p->next = NULL;
   return p;
 }
-int readcrawlerinfo(char *dir,char **seedurl,int *maxdepth,int *filecount,int *currentdepth,int *sizeofstorage)
+int readcrawlerinfo(char *dir, char **seedurl, int *maxdepth, int *filecount, int *currentdepth, int *sizeofstorage)
 {
-    char location[250];
-    strcpy(location,dir);
-    strcat(location,"crawlerinfo.txt");
-    FILE *f = fopen(location,"r");
-    if(f==NULL)
-    {
-      printf("File cannot be opened.");
-      return 1;
-    }
-    else
-    {
-      printf("File %s opened successfully\n",location);
-    }
-    char x[8];
-    int length,i;
-    strcpy(location,"");
-    *maxdepth=0;*filecount=0;*sizeofstorage=0;*currentdepth=0;
-    //fetch seedurl
-    char c=getc(f);
-    for(i=0;c!='\n';i++)
-    {
-      //printf("%c",c);
-      location[i]=c;
-      c=getc(f);
-    }
-    location[i]='\0';
-    strcpy(*seedurl,location);
-    //fgets(*seedurl,200,f);
-    //fetch maximumdepth
-    fgets(x,8,f);
-    length=strlen(x);
-    for(int j=0;j<length-1;j++)
-    {
-      *maxdepth=*maxdepth*10+(x[j]-'0');
-    }
-    //fetch filecount
-    fgets(x,8,f);
-    length=strlen(x);
-    for(int j=0;j<length-1;j++)
-    {
-      *filecount=*filecount*10+(x[j]-'0');
-    }
-    fgets(x,8,f);
-    length=strlen(x);
-    for(int j=0;j<length-1;j++)
-    {
-      *currentdepth=*currentdepth*10+(x[j]-'0');
-    }
-    fgets(x,8,f);
-    length=strlen(x);
-    for(int j=0;j<length-1;j++)
-    {
-      *sizeofstorage=*sizeofstorage*10+(x[j]-'0');
-    }
-    fclose(f);
-    printf("Reading crawlerinfo complete\nSeedUrl is %s\nMaxdepth is %d\nFilecount is %d\ncurrentdepth is %d\nSizeofstorage is %d\n\n",*seedurl,*maxdepth,*filecount,*currentdepth,*sizeofstorage);
-    return 0;
+  char location[250];
+  strcpy(location, dir);
+  strcat(location, "crawlerinfo.txt");
+  FILE *f = fopen(location, "r");
+  if (f == NULL)
+  {
+    printf("File cannot be opened.");
+    return 1;
+  }
+  else
+  {
+    printf("File %s opened successfully\n", location);
+  }
+  char x[8];
+  int length, i;
+  strcpy(location, "");
+  *maxdepth = 0;
+  *filecount = 0;
+  *sizeofstorage = 0;
+  *currentdepth = 0;
+  //fetch seedurl
+  char c = getc(f);
+  for (i = 0; c != '\n'; i++)
+  {
+    //printf("%c",c);
+    location[i] = c;
+    c = getc(f);
+  }
+  location[i] = '\0';
+  strcpy(*seedurl, location);
+  //fgets(*seedurl,200,f);
+  //fetch maximumdepth
+  fgets(x, 8, f);
+  length = strlen(x);
+  for (int j = 0; j < length - 1; j++)
+  {
+    *maxdepth = *maxdepth * 10 + (x[j] - '0');
+  }
+  //fetch filecount
+  fgets(x, 8, f);
+  length = strlen(x);
+  for (int j = 0; j < length - 1; j++)
+  {
+    *filecount = *filecount * 10 + (x[j] - '0');
+  }
+  fgets(x, 8, f);
+  length = strlen(x);
+  for (int j = 0; j < length - 1; j++)
+  {
+    *currentdepth = *currentdepth * 10 + (x[j] - '0');
+  }
+  fgets(x, 8, f);
+  length = strlen(x);
+  for (int j = 0; j < length - 1; j++)
+  {
+    *sizeofstorage = *sizeofstorage * 10 + (x[j] - '0');
+  }
+  fclose(f);
+  printf("Reading crawlerinfo complete\nSeedUrl is %s\nMaxdepth is %d\nFilecount is %d\ncurrentdepth is %d\nSizeofstorage is %d\n\n", *seedurl, *maxdepth, *filecount, *currentdepth, *sizeofstorage);
+  return 0;
 }
-void writecrawlerinfo(char *dir,char *url,int maxdepth,int filecount,int currentdepth,int sizeofstorage)
+void writecrawlerinfo(char *dir, char *url, int maxdepth, int filecount, int currentdepth, int sizeofstorage)
 {
   char location[250];
   char depth[2];
   char count[3];
-  strcpy(location,dir);
-  strcat(location,"crawlerinfo.txt");
-  FILE *f = fopen(location,"w");
-  fputs(url,f);
-  fputc('\n',f);
-  sprintf(depth,"%d",maxdepth);
-  fputs(depth,f);
-  fputc('\n',f);
-  sprintf(count,"%d",filecount);
-  fputs(count,f);
-  fputc('\n',f);
-  sprintf(count,"%d",currentdepth);
-  fputs(count,f);
-  fputc('\n',f);
-  sprintf(count,"%d",sizeofstorage);
-  fputs(count,f);
-  fputc('\n',f);
+  strcpy(location, dir);
+  strcat(location, "crawlerinfo.txt");
+  FILE *f = fopen(location, "w");
+  fputs(url, f);
+  fputc('\n', f);
+  sprintf(depth, "%d", maxdepth);
+  fputs(depth, f);
+  fputc('\n', f);
+  sprintf(count, "%d", filecount);
+  fputs(count, f);
+  fputc('\n', f);
+  sprintf(count, "%d", currentdepth);
+  fputs(count, f);
+  fputc('\n', f);
+  sprintf(count, "%d", sizeofstorage);
+  fputs(count, f);
+  fputc('\n', f);
   fclose(f);
 }
 int main()
 {
   char input;
-  int i, maxdepth=5, filecount=0;
-  int sizeofstorage=10;
-  int currentdepth=1;
+  int i, maxdepth = 5, filecount = 0;
+  int sizeofstorage = 30;
+  int currentdepth = 1;
   char *url = (char *)malloc(sizeof(char) * 2000);
   char *seedurl = (char *)malloc(sizeof(char) * 200);
   char dir[200];
@@ -622,25 +627,34 @@ int main()
   struct list *head = NULL;
   struct list *tail = NULL;
   struct list *temp;
+  //creating storage for local links
   char *store[100];
   for (i = 0; i < 100; i++)
   {
     store[i] = (char *)malloc(sizeof(char) * 2000);
   }
+  //creating hash table for speed search
+  /*
+  struct list *searchhash[10];
+  for (i = 0; i < 10; i++)
+  {
+    searchhash[i] = NULL;
+  }
+  */
   printf("Do you want to load list ?? (y/n)\n");
   scanf("%c", &input);
-  printf("%c\n",input);
+  printf("%c\n", input);
   if (input == 'y' || input == 'Y')
   {
     printf("Enter file directory\n");
     //scanf("%s",dir);
-    strcpy(dir,"/home/nikhil/Desktop/APC/SearchEngine/");
+    strcpy(dir, "/home/nikhil/Desktop/APC/SearchEngine/");
     testDir(dir);
     //Get seedurl,maxdepth,filecount
-    if(readcrawlerinfo(dir,&seedurl,&maxdepth,&filecount,&currentdepth,&sizeofstorage))
-    return 1;
+    if (readcrawlerinfo(dir, &seedurl, &maxdepth, &filecount, &currentdepth, &sizeofstorage))
+      return 1;
     //Fetch the link list from the file and insert all the data in a data structure.
-    tail=getlinks(dir,&head);
+    tail = getlinks(dir, &head);
     //Printing urls in the list
     printlist(head);
   }
@@ -667,20 +681,20 @@ int main()
     if (temp != NULL)
       tail = temp;
     tail->visitedflag = 0;
-    currentdepth=1;
+    currentdepth = 1;
     filecount = 1;
     //Saving all the data in crawlerinfo.txt file
-    writecrawlerinfo(dir,seedurl,maxdepth,filecount,currentdepth,sizeofstorage);
+    writecrawlerinfo(dir, seedurl, maxdepth, filecount, currentdepth, sizeofstorage);
   }
 
   //************************Next Phase***************************//
   //From here both the cases of reading from a link list or a new one combines
-  while (currentdepth<maxdepth)
+  while (currentdepth < maxdepth)
   {
     //printlist(head);
-    while (currentdepth<maxdepth)
+    while (currentdepth < maxdepth)
     {
-      if(getnexturlfromlist(head,currentdepth,url))
+      if (getnexturlfromlist(head, currentdepth, url))
       {
         printf("---Url found----\n");
         break;
@@ -688,24 +702,24 @@ int main()
       else
       {
         currentdepth++;
-        sizeofstorage-=5;
+        sizeofstorage -= 5;
       }
-      printf(" Current depth is %d\n\n",currentdepth);
+      printf(" Current depth is %d\n\n", currentdepth);
     }
-    if(currentdepth==maxdepth)
+    if (currentdepth == maxdepth)
       break;
     printf("\n\n||||||||||||||outside getnext url||||||||\n\n");
-    getpage(url,dir);
+    getpage(url, dir);
     int filesize = 0;
     char *htmlbuffer;
-    filesize = createfile(&htmlbuffer, &filecount,url,dir);
+    filesize = createfile(&htmlbuffer, &filecount, url, dir);
     printf("\n\nFile created-------File count is %d\n\n", filecount);
     int pos;
-    pos=0;
+    pos = 0;
     i = 0;
-    int count,linkcount;
-    count=0;
-    linkcount=0;
+    int count, linkcount;
+    count = 0;
+    linkcount = 0;
     while (pos < filesize)
     {
       //result=" ";
@@ -748,8 +762,8 @@ int main()
         tail = temp;
     }
     //Writing data to a files
-    writeurlstofile(dir,head);
-    writecrawlerinfo(dir,seedurl,maxdepth,filecount,currentdepth,sizeofstorage);
+    writeurlstofile(dir, head);
+    writecrawlerinfo(dir, seedurl, maxdepth, filecount, currentdepth, sizeofstorage);
     //Printing urls in the list
     printlist(head);
     //free pointers !!!
@@ -773,25 +787,10 @@ int main()
   return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //temp=head;
 /*
 {
-  //creating hash table
+  //creating hash table for speed search
   struct list *searchhash[10];
     for(i=0;i<10;i++)
     {
