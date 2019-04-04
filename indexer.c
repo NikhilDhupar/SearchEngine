@@ -13,6 +13,38 @@ struct word
     char w[50];
     struct link *head;
 };
+void parsestring(char *result,char *url,struct word **list)
+{
+    int start=0,end=-1;
+    char word[50];
+    for(int i=0;result[i]!='\0';i++)
+    {
+        if(result[i]<65||(result[i]>92&&result[i]<97)||result[i]>122)
+        {
+            if(!(result[i+1]<65||(result[i+1]>92&&result[i+1]<97)||result[i+1]>122))
+            {
+                start=i+1;
+            }
+        }
+        else
+        {
+            if(result[i+1]<65||(result[i+1]>92&&result[i+1]<97)||result[i+1]>122)
+            {
+                end=i;
+                int k=0;
+                for(int j=start;j<=end;j++)
+                {
+                    word[k]=result[j];
+                    k++;
+                }
+                word[k]='\0';
+                start=-1;
+                end=-1;
+                printf("%s\n",word);
+            }
+        }
+    }
+}
 void getresult(char *html,char *result,int start,int end)
 {
     int i,j=0;
@@ -153,6 +185,7 @@ int main()
             while (position != -1)
             {
                 position = findtag(html, result, position,tags[r]);
+                parsestring(result,url,&head);
             }
         }
         filecount++;
